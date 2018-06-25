@@ -47,13 +47,13 @@ import org.slf4j.LoggerFactory;
 
 public class RouteInfoManager {
     private static final Logger log = LoggerFactory.getLogger(LoggerName.NAMESRV_LOGGER_NAME);
-    private final static long BROKER_CHANNEL_EXPIRED_TIME = 1000 * 60 * 2;
+    private final static long BROKER_CHANNEL_EXPIRED_TIME = 1000 * 60 * 2; //broker过期时间
     private final ReadWriteLock lock = new ReentrantReadWriteLock();
-    private final HashMap<String/* topic */, List<QueueData>> topicQueueTable;
-    private final HashMap<String/* brokerName */, BrokerData> brokerAddrTable;
-    private final HashMap<String/* clusterName */, Set<String/* brokerName */>> clusterAddrTable;
-    private final HashMap<String/* brokerAddr */, BrokerLiveInfo> brokerLiveTable;
-    private final HashMap<String/* brokerAddr */, List<String>/* Filter Server */> filterServerTable;
+    private final HashMap<String/* topic */, List<QueueData>> topicQueueTable; //消息队列
+    private final HashMap<String/* brokerName */, BrokerData> brokerAddrTable; //代理地址
+    private final HashMap<String/* clusterName */, Set<String/* brokerName */>> clusterAddrTable; //集群地址
+    private final HashMap<String/* brokerAddr */, BrokerLiveInfo> brokerLiveTable; //活动的broker
+    private final HashMap<String/* brokerAddr */, List<String>/* Filter Server */> filterServerTable; //过滤服务器
 
     public RouteInfoManager() {
         this.topicQueueTable = new HashMap<String, List<QueueData>>(1024);

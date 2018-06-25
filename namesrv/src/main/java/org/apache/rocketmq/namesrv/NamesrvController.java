@@ -36,26 +36,26 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class NamesrvController {
-    private static final Logger log = LoggerFactory.getLogger(LoggerName.NAMESRV_LOGGER_NAME);
+    private static final Logger log = LoggerFactory.getLogger(LoggerName.NAMESRV_LOGGER_NAME);//指定namesrv下的日志
 
-    private final NamesrvConfig namesrvConfig;
+    private final NamesrvConfig namesrvConfig;//namesrv的配置
 
-    private final NettyServerConfig nettyServerConfig;
+    private final NettyServerConfig nettyServerConfig;//netty的配置
 
     private final ScheduledExecutorService scheduledExecutorService = Executors.newSingleThreadScheduledExecutor(new ThreadFactoryImpl(
-        "NSScheduledThread"));
-    private final KVConfigManager kvConfigManager;
-    private final RouteInfoManager routeInfoManager;
+        "NSScheduledThread"));//设置带有前缀的定时任务线程池
+    private final KVConfigManager kvConfigManager;//键值对管理器
+    private final RouteInfoManager routeInfoManager;//路由信息管理器
 
-    private RemotingServer remotingServer;
+    private RemotingServer remotingServer; //底层基础通信模块
 
-    private BrokerHousekeepingService brokerHousekeepingService;
+    private BrokerHousekeepingService brokerHousekeepingService;//保证broker与namesrv的链接
 
-    private ExecutorService remotingExecutor;
+    private ExecutorService remotingExecutor;//远程执行的线程池
 
-    private Configuration configuration;
+    private Configuration configuration; //配置
 
-    public NamesrvController(NamesrvConfig namesrvConfig, NettyServerConfig nettyServerConfig) {
+    public NamesrvController(NamesrvConfig namesrvConfig, NettyServerConfig nettyServerConfig) {//根据参数初始化
         this.namesrvConfig = namesrvConfig;
         this.nettyServerConfig = nettyServerConfig;
         this.kvConfigManager = new KVConfigManager(this);
@@ -72,9 +72,9 @@ public class NamesrvController {
 
         this.kvConfigManager.load();
 
-        this.remotingServer = new NettyRemotingServer(this.nettyServerConfig, this.brokerHousekeepingService);
+        this.remotingServer = new NettyRemotingServer(this.nettyServerConfig, this.brokerHousekeepingService);//初始化通信模块
 
-        this.remotingExecutor =
+        this.remotingExecutor = //固定大小的线程池，远程前缀
             Executors.newFixedThreadPool(nettyServerConfig.getServerWorkerThreads(), new ThreadFactoryImpl("RemotingExecutorThread_"));
 
         this.registerProcessor();
@@ -83,7 +83,7 @@ public class NamesrvController {
 
             @Override
             public void run() {
-                NamesrvController.this.routeInfoManager.scanNotActiveBroker();
+                NamesrvController.this.routeInfoManager.scanNotActiveBroker(); //路由信息管理器定时扫描broker，5秒之后开始执行，然后每隔10秒执行一次
             }
         }, 5, 10, TimeUnit.SECONDS);
 
@@ -91,7 +91,7 @@ public class NamesrvController {
 
             @Override
             public void run() {
-                NamesrvController.this.kvConfigManager.printAllPeriodically();
+                NamesrvController.this.kvConfigManager.printAllPeriodically(); //kv管理器定时打印配置，1分钟之后执行，每个10分钟再执行一次
             }
         }, 1, 10, TimeUnit.MINUTES);
 
@@ -104,13 +104,13 @@ public class NamesrvController {
             this.remotingServer.registerDefaultProcessor(new ClusterTestRequestProcessor(this, namesrvConfig.getProductEnvName()),
                 this.remotingExecutor);
         } else {
-
+            //在启动的时候会把RequestCode与对应的RequestProcessor和处理线程池注册到NettyRemotingServer中去
             this.remotingServer.registerDefaultProcessor(new DefaultRequestProcessor(this), this.remotingExecutor);
         }
     }
 
     public void start() throws Exception {
-        this.remotingServer.start();
+        this.remotingServer.start();//启动通信
     }
 
     public void shutdown() {

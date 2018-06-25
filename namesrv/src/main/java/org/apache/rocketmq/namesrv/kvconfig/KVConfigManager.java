@@ -34,14 +34,15 @@ public class KVConfigManager {
 
     private final NamesrvController namesrvController;
 
-    private final ReadWriteLock lock = new ReentrantReadWriteLock();
+    private final ReadWriteLock lock = new ReentrantReadWriteLock();//读写锁
     private final HashMap<String/* Namespace */, HashMap<String/* Key */, String/* Value */>> configTable =
-        new HashMap<String, HashMap<String, String>>();
+        new HashMap<String, HashMap<String, String>>();//配置表
 
     public KVConfigManager(NamesrvController namesrvController) {
         this.namesrvController = namesrvController;
     }
 
+    //从配置文件中加载
     public void load() {
         String content = null;
         try {
@@ -59,9 +60,10 @@ public class KVConfigManager {
         }
     }
 
+    //添加配置，并持久化
     public void putKVConfig(final String namespace, final String key, final String value) {
         try {
-            this.lock.writeLock().lockInterruptibly();
+            this.lock.writeLock().lockInterruptibly();//写锁
             try {
                 HashMap<String, String> kvTable = this.configTable.get(namespace);
                 if (null == kvTable) {
@@ -88,9 +90,10 @@ public class KVConfigManager {
         this.persist();
     }
 
+    //持久化到文件
     public void persist() {
         try {
-            this.lock.readLock().lockInterruptibly();
+            this.lock.readLock().lockInterruptibly();//读锁
             try {
                 KVConfigSerializeWrapper kvConfigSerializeWrapper = new KVConfigSerializeWrapper();
                 kvConfigSerializeWrapper.setConfigTable(this.configTable);
@@ -112,6 +115,7 @@ public class KVConfigManager {
 
     }
 
+    //删除并持久化
     public void deleteKVConfig(final String namespace, final String key) {
         try {
             this.lock.writeLock().lockInterruptibly();

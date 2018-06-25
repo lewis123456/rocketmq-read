@@ -19,7 +19,7 @@ package org.apache.rocketmq.namesrv.kvconfig;
 import java.util.HashMap;
 import org.apache.rocketmq.remoting.protocol.RemotingSerializable;
 
-public class KVConfigSerializeWrapper extends RemotingSerializable {
+public class KVConfigSerializeWrapper extends RemotingSerializable {//持久化时使用的包装器类
     private HashMap<String/* Namespace */, HashMap<String/* Key */, String/* Value */>> configTable;
 
     public HashMap<String, HashMap<String, String>> getConfigTable() {
